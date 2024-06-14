@@ -6,7 +6,6 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const mysql2 = require('mysql2');
 const nodemailer = require('nodemailer');
-const crypto = require('crypto');
 const app = express();
 const port = 3000;
 
@@ -21,37 +20,11 @@ const conn = mysql2.createConnection({
 
 const secretKey = process.env.SECRET_KEY || 'temporary_secret_key'; // Use environment variable for the secret key
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL,
-    pass: process.env.EMAIL_PASSWORD
-  }
-});
-
-const sendVerificationEmail = (email, token) => {
-  const mailOptions = {
-    from: process.env.EMAIL,
-    to: email,
-    subject: 'Account Verification',
-    text: `Please verify your account by clicking the link: http://localhost:3000/verify-email?token=${token}`
-  };
-
-  transporter.sendMail(mailOptions, (err, info) => {
-    if (err) {
-      console.error('Error sending email:', err);
-    } else {
-      console.log('Email sent:', info.response);
-    }
-  });
-};
-
 // Registration endpoint
 app.post('/register', async (req, res) => {
   const { email, password } = req.body;
   const saltRounds = 10;
   let role = 'member';
-  const verificationToken = crypto.randomBytes(20).toString('hex');
 
   if (!email || !password) {
     return res.status(400).json({ message: 'Email and password are required' });
@@ -61,40 +34,17 @@ app.post('/register', async (req, res) => {
     const salt = await bcrypt.genSalt(saltRounds);
     const hash = await bcrypt.hash(password, salt);
 
-    const sql = 'INSERT INTO users (email, password, role, verified, verification_token) VALUES (?, ?, ?, ?, ?)';
-    conn.execute(sql, [email, hash, role, false, verificationToken], (err, result) => {
+    const sql = 'INSERT INTO users (email, password, role, verified) VALUES (?, ?, ?, ?)';
+    conn.execute(sql, [email, hash, role, true], (err, result) => { // Set verified to true
       if (err) {
         return res.status(500).json({ message: err.message });
       }
 
-      sendVerificationEmail(email, verificationToken);
-      res.status(200).json({ message: 'User registered successfully. Please check your email to verify your account.', data: result });
+      res.status(200).json({ message: 'User registered successfully.', data: result });
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
-});
-
-// Email verification endpoint
-app.get('/verify-email', (req, res) => {
-  const { token } = req.query;
-
-  if (!token) {
-    return res.status(400).json({ message: 'Verification token is required' });
-  }
-
-  const sql = 'UPDATE users SET verified = true WHERE verification_token = ?';
-  conn.execute(sql, [token], (err, result) => {
-    if (err) {
-      return res.status(500).json({ message: err.message });
-    }
-
-    if (result.affectedRows === 0) {
-      return res.status(400).json({ message: 'Invalid verification token' });
-    }
-
-    res.status(200).json({ message: 'Email verified successfully' });
-  });
 });
 
 // Login endpoint
@@ -116,9 +66,6 @@ app.post('/login', (req, res) => {
     }
 
     const user = results[0];
-    if (!user.verified) {
-      return res.status(401).json({ message: 'Email not verified' });
-    }
 
     const match = await bcrypt.compare(password, user.password);
 
@@ -148,77 +95,41 @@ app.get('/protected', (req, res) => {
   }
 });
 
-// Request password reset endpoint
-app.post('/request-password-reset', (req, res) => {
-  const { email } = req.body;
-  const resetToken = crypto.randomBytes(20).toString('hex');
-
-  if (!email) {
-    return res.status(400).json({ message: 'Email is required' });
-  }
-
-  const sql = 'UPDATE users SET reset_token = ? WHERE email = ?';
-  conn.execute(sql, [resetToken, email], (err, result) => {
-    if (err) {
-      return res.status(500).json({ message: err.message });
-    }
-
-    if (result.affectedRows === 0) {
-      return res.status(400).json({ message: 'Email not found' });
-    }
-
-    const mailOptions = {
-      from: process.env.EMAIL,
-      to: email,
-      subject: 'Password Reset',
-      text: `Please reset your password by clicking the link: http://localhost:3000/reset-password?token=${resetToken}`
-    };
-
-    transporter.sendMail(mailOptions, (err, info) => {
-      if (err) {
-        console.error('Error sending email:', err);
-        return res.status(500).json({ message: 'Error sending email' });
-      } else {
-        console.log('Email sent:', info.response);
-        res.status(200).json({ message: 'Password reset email sent' });
-      }
-    });
-  });
-});
-
 // Reset password endpoint
 app.post('/reset-password', async (req, res) => {
-  const { token, newPassword } = req.body;
+  const { email, oldPassword, newPassword } = req.body;
 
-  if (!token || !newPassword) {
-    return res.status(400).json({ message: 'Token and new password are required' });
+  if (!email || !oldPassword || !newPassword) {
+    return res.status(400).json({ message: 'Email, old password, and new password are required' });
   }
 
-  const sql = 'SELECT * FROM users WHERE reset_token = ?';
-  conn.execute(sql, [token], async (err, results) => {
+  const sql = 'SELECT * FROM users WHERE email = ?';
+  conn.execute(sql, [email], async (err, results) => {
     if (err) {
-      console.error('Error executing query:', err.message);
       return res.status(500).json({ message: err.message });
     }
 
     if (results.length === 0) {
-      console.log('No user found with the provided reset token.');
-      return res.status(400).json({ message: 'Invalid reset token' });
+      return res.status(400).json({ message: 'User not found' });
     }
 
     const user = results[0];
+    const match = await bcrypt.compare(oldPassword, user.password);
+
+    if (!match) {
+      return res.status(401).json({ message: 'Old password is incorrect' });
+    }
+
     const saltRounds = 10;
     const salt = await bcrypt.genSalt(saltRounds);
     const hash = await bcrypt.hash(newPassword, salt);
 
-    const updateSql = 'UPDATE users SET password = ?, reset_token = NULL WHERE id = ?';
+    const updateSql = 'UPDATE users SET password = ? WHERE id = ?';
     conn.execute(updateSql, [hash, user.id], (err, result) => {
       if (err) {
-        console.error('Error executing update query:', err.message);
         return res.status(500).json({ message: err.message });
       }
 
-      console.log('Password reset successfully for user id:', user.id);
       res.status(200).json({ message: 'Password reset successfully' });
     });
   });
