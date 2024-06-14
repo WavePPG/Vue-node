@@ -5,22 +5,23 @@
 </template>
 
 <script>
-import axios from 'axios';
+import axios from './services/axios'
 
 export default {
   data() {
     return {
-      message: 'Loading...',
-    };
+      message: 'Loading...'
+    }
   },
   created() {
-    axios.get('http://localhost:3000/api/message')
-      .then(response => {
-        this.message = response.data.message;
+    axios
+      .get('/api/message')
+      .then((response) => {
+        this.message = response.data.message
       })
-      .catch(error => {
-        console.error(error);
-      });
-  },
-};
+      .catch((error) => {
+        console.error(error)
+      })
+  }
+}
 </script>
