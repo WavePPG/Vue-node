@@ -1,27 +1,20 @@
 <template>
   <div id="app">
-    <h1>{{ message }}</h1>
+    <nav>
+      <router-link to="/login">Login</router-link>
+      <router-link to="/register">Register</router-link>
+      <router-link to="/reset-password">Reset Password</router-link>
+    </nav>
+    <router-view />
   </div>
 </template>
 
 <script>
-import axios from './services/axios'
-
 export default {
-  data() {
-    return {
-      message: 'Loading...'
-    }
-  },
-  created() {
-    axios
-      .get('/api/message')
-      .then((response) => {
-        this.message = response.data.message
-      })
-      .catch((error) => {
-        console.error(error)
-      })
-  }
-}
+  name: 'App',
+};
 </script>
+
+<style>
+/* Add your styles here */
+</style>
