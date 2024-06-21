@@ -20,6 +20,7 @@ Clone the repository to your local machine and navigate to the project directory
 ```sh
 git clone https://github.com/your-username/project-name.git
 cd back-end
+```sh
 npm run dev
 
 cd cd back-end
