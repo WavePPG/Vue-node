@@ -19,4 +19,8 @@ Clone the repository to your local machine and navigate to the project directory
 
 ```sh
 git clone https://github.com/your-username/project-name.git
-cd project-name
+cd back-end
+npm run dev
+
+cd cd back-end
+npm run dev
