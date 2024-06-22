@@ -24,8 +24,6 @@ cd project-name
 Running the Backend
 Navigate to the backend directory and start the development server:
 
-sh
-Copy code
 cd back-end
 npm install
 npm run dev
@@ -33,18 +31,12 @@ npm run dev
 Running the Frontend
 Navigate to the frontend directory and start the development server:
 
-sh
-Copy code
 cd front-end
 npm install
 npm run dev
 Access the Application
 Open your browser and navigate to the following URL to access the admin login page:
 
-bash
-Copy code
 http://localhost:5173/admin/login
-Use the following credentials to log in:
-
 Username: admin
 Password: 123456
