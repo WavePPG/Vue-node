@@ -7,6 +7,7 @@ import AdminDashboard from '../components/admin/AdminDashboard.vue';
 import AdminLogin from '../components/admin/AdminLogin.vue';
 import UserLayout from '../layouts/UserLayout.vue';
 import AdminLayout from '../layouts/AdminLayout.vue';
+import UploadProduct from '../components/admin/UploadProduct.vue';
 
 const routes = [
   {
@@ -53,6 +54,12 @@ const routes = [
         path: 'dashboard',
         name: 'AdminDashboard',
         component: AdminDashboard,
+        meta: { requiresAuth: true },
+      },
+      {
+        path: 'upload-product',
+        name: 'UploadProduct',
+        component: UploadProduct,
         meta: { requiresAuth: true },
       },
     ],

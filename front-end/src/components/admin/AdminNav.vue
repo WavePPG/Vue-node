@@ -4,6 +4,7 @@
       <div class="spacer"></div>
       <div class="nav-links">
         <router-link to="/admin/dashboard">Dashboard</router-link>
+        <router-link to="/admin/upload-product">upload-product</router-link>
       </div>
       <div class="spacer"></div>
       <div @click="logout" class="logout-icon">
