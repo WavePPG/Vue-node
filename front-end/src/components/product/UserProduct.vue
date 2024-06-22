@@ -3,21 +3,10 @@
     <h2>Product Page</h2>
     <p>Welcome to the product page.</p>
     <!-- Add your product-related content here -->
-    <button @click="logout" class="btn-logout">Logout</button>
   </div>
 </template>
 
 <script>
-export default {
-  name: 'UserProduct',
-  methods: {
-    logout() {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      this.$router.push({ name: 'UserLogin' }); // Redirect to login page
-    }
-  }
-};
 </script>
 
 <style scoped>
