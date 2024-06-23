@@ -8,6 +8,7 @@ import AdminLogin from '../components/admin/AdminLogin.vue';
 import UserLayout from '../layouts/UserLayout.vue';
 import AdminLayout from '../layouts/AdminLayout.vue';
 import UploadProduct from '../components/admin/UploadProduct.vue';
+import UserProfile from '../components/UserProfile.vue'; // Import UserProfile component
 
 const routes = [
   {
@@ -39,6 +40,12 @@ const routes = [
         name: 'UserProduct',
         component: UserProduct,
       },
+      {
+        path: 'profile',
+        name: 'UserProfile',
+        component: UserProfile, // Add UserProfile route
+        meta: { requiresAuth: true }, // Add requiresAuth meta field
+      },
     ],
   },
   {
@@ -49,23 +56,24 @@ const routes = [
         path: 'login',
         name: 'AdminLogin',
         component: AdminLogin,
+        meta: { hideSidebar: true }, // Meta field to conditionally hide sidebar
       },
       {
         path: 'dashboard',
         name: 'AdminDashboard',
         component: AdminDashboard,
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true }, // Meta field for authentication guard
       },
       {
         path: 'upload-product',
         name: 'UploadProduct',
         component: UploadProduct,
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true }, // Meta field for authentication guard
       },
     ],
   },
   {
-    path: '/:pathMatch(.*)*',
+    path: '/:pathMatch(.*)*', // Handle unmatched routes
     redirect: '/',
   },
 ];
@@ -75,7 +83,7 @@ const router = createRouter({
   routes,
 });
 
-// Guard เพื่อป้องกันการเข้าถึงหน้าแอดมินโดยไม่เข้าสู่ระบบ
+// Navigation guard to prevent access to admin pages without logging in
 router.beforeEach((to, from, next) => {
   const loggedIn = localStorage.getItem('token');
   if (to.matched.some(record => record.meta.requiresAuth) && !loggedIn) {

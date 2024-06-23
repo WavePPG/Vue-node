@@ -3,6 +3,10 @@
     <h2>Register</h2>
     <form @submit.prevent="register">
       <div class="form-group">
+        <label for="username">Username:</label>
+        <input type="text" v-model="username" required />
+      </div>
+      <div class="form-group">
         <label for="email">Email:</label>
         <input type="email" v-model="email" required />
       </div>
@@ -17,9 +21,9 @@
       <button type="submit" class="btn-register">Register</button>
     </form>
     <div class="extra-options">
-      <button @click="goToLogin" class="btn-secondary">Already a member  Login</button>
+      <button @click="goToLogin" class="btn-secondary">Already a member? Login</button>
     </div>
-    <div v-if="message" class="message">{{ message }}</div>
+    <div v-if="message" :class="['message', { 'success': isSuccess }]">{{ message }}</div>
   </div>
 </template>
 
@@ -29,31 +33,43 @@ import axiosInstance from '../services/axiosInstance';
 export default {
   data() {
     return {
+      username: '',
       email: '',
       password: '',
       confirmPassword: '',
       message: '',
+      isSuccess: false,
     };
   },
   methods: {
     async register() {
       if (this.password !== this.confirmPassword) {
         this.message = "Passwords do not match!";
+        this.isSuccess = false;
         return;
       }
 
       try {
         const response = await axiosInstance.post('/register', {
+          username: this.username,
           email: this.email,
           password: this.password,
         });
         this.message = response.data.message;
+        this.isSuccess = true;
+        this.showPopup();
       } catch (error) {
         this.message = error.response.data.message || 'Registration failed';
+        this.isSuccess = false;
       }
     },
     goToLogin() {
       this.$router.push({ name: 'UserLogin' });
+    },
+    showPopup() {
+      setTimeout(() => {
+        this.message = '';
+      }, 3000); // Hide the message after 3 seconds
     },
   },
 };
@@ -129,5 +145,9 @@ input {
   margin-top: 20px;
   text-align: center;
   color: red;
+}
+
+.message.success {
+  color: green;
 }
 </style>

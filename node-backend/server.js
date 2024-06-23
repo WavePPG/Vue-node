@@ -22,20 +22,20 @@ const secretKey = process.env.SECRET_KEY || 'temporary_secret_key'; // Use envir
 
 // Registration endpoint
 app.post('/register', async (req, res) => {
-  const { email, password } = req.body;
+  const { username, email, password } = req.body;
   const saltRounds = 10;
   let role = 'member';
 
-  if (!email || !password) {
-    return res.status(400).json({ message: 'Email and password are required' });
+  if (!username || !email || !password) {
+    return res.status(400).json({ message: 'Username, email and password are required' });
   }
 
   try {
     const salt = await bcrypt.genSalt(saltRounds);
     const hash = await bcrypt.hash(password, salt);
 
-    const sql = 'INSERT INTO users (email, password, role, verified) VALUES (?, ?, ?, ?)';
-    conn.execute(sql, [email, hash, role, true], (err, result) => { // Set verified to true
+    const sql = 'INSERT INTO users (username, email, password, role, verified) VALUES (?, ?, ?, ?, ?)';
+    conn.execute(sql, [username, email, hash, role, true], (err, result) => { // Set verified to true
       if (err) {
         return res.status(500).json({ message: err.message });
       }
@@ -46,6 +46,7 @@ app.post('/register', async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
+
 // Admin Login endpoint
 app.post('/admin/login', (req, res) => {
   const { username, password } = req.body;
@@ -85,7 +86,6 @@ app.post('/admin/login', (req, res) => {
   });
 });
 
-
 // Login endpoint
 app.post('/login', (req, res) => {
   const { email, password } = req.body;
@@ -113,9 +113,10 @@ app.post('/login', (req, res) => {
     }
 
     const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, secretKey, { expiresIn: '1h' });
-    res.status(200).json({ message: 'Login successful', token });
+    res.status(200).json({ message: 'Login successful', token, username: user.username });
   });
 });
+
 
 // Protected route example
 app.get('/protected', (req, res) => {
