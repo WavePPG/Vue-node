@@ -1,5 +1,5 @@
 <template>
-  <div class="container mx-auto py-8">
+  <div class="container mx-auto py-8 pl-8">
     <h2 class="text-2xl font-bold mb-6">Product Dashboard</h2>
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
       <div v-for="product in products" :key="product.id" class="bg-white rounded-lg shadow-md overflow-hidden">
