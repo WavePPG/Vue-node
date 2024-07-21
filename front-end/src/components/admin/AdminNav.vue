@@ -22,6 +22,9 @@
         <span v-if="isOpen" class="ml-4 text-gray-700">Logout</span>
       </div>
     </div>
+    <div :class="['main-content transition-margin duration-300', isOpen ? 'ml-64' : 'ml-16']">
+      <!-- Main content goes here -->
+    </div>
   </div>
 </template>
 
@@ -62,5 +65,8 @@ export default {
 }
 .flex.flex-col.mt-16.space-y-8.items-start {
   align-items: flex-start;
+}
+.main-content {
+  margin-left: 16rem; /* Adjust this value to match the sidebar width */
 }
 </style>

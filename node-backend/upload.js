@@ -61,9 +61,13 @@ app.post('/upload', upload.single('image'), (req, res) => {
   });
 });
 
-// New route to get all products
+// New route to get all products with type name
 app.get('/products', (req, res) => {
-  const query = 'SELECT * FROM product';
+  const query = `
+    SELECT p.*, t.type_name AS typename 
+    FROM product p 
+    JOIN type t ON p.type_id = t.type_id
+  `;
   db.query(query, (err, results) => {
     if (err) throw err;
     res.json(results);

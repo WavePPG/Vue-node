@@ -1,19 +1,37 @@
 <template>
-  <div class="container mx-auto py-8 pl-8">
+  <div class="container mx-auto py-8 pl-20"> <!-- Updated padding -->
     <h2 class="text-2xl font-bold mb-6">Product Dashboard</h2>
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-      <div v-for="product in products" :key="product.id" class="bg-white rounded-lg shadow-md overflow-hidden">
-        <img :src="'http://localhost:3001/uploads/' + product.image" alt="Product Image" class="w-full h-48 object-cover">
-        <div class="p-4">
-          <h3 class="text-lg font-semibold">{{ product.pro_name }}</h3>
-          <p class="text-gray-600">Type: {{ product.type_id }}</p>
-          <p class="text-gray-600">Price: {{ product.price }}</p>
-          <p class="text-gray-600">Amount: {{ product.amount }}</p>
-          <p class="text-gray-600 mb-4">{{ product.pro_description }}</p>
-          <button @click="editProduct(product)" class="bg-blue-500 text-white px-4 py-2 rounded">Edit</button>
-          <button @click="showDeleteModal(product.id)" class="bg-red-500 text-white px-4 py-2 rounded ml-2">Delete</button>
-        </div>
-      </div>
+    <div class="overflow-x-auto">
+      <table class="min-w-full bg-white">
+        <thead class="bg-gray-800 text-white">
+          <tr>
+            <th class="w-1/6 py-2">Image</th>
+            <th class="w-1/6 py-2">Product Name</th>
+            <th class="w-1/6 py-2">Type</th>
+            <th class="w-1/6 py-2">Price</th>
+            <th class="w-1/6 py-2">Amount</th>
+            <th class="w-1/6 py-2">Description</th>
+            <th class="w-1/6 py-2">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="product in products" :key="product.id">
+            <td class="border px-4 py-2"><img :src="'http://localhost:3001/uploads/' + product.image" alt="Product Image" class="w-full h-24 object-cover"></td>
+            <td class="border px-4 py-2">{{ product.pro_name }}</td>
+            <td class="border px-4 py-2">{{ product.typename }}</td> <!-- ใช้ typename แทน type_id -->
+            <td class="border px-4 py-2">{{ product.price }}</td>
+            <td class="border px-4 py-2">{{ product.amount }}</td>
+            <td class="border px-4 py-2">{{ product.pro_description }}</td>
+            <td class="border px-4 py-2">
+              <div class="flex space-x-2">
+                <button @click="editProduct(product)" class="bg-blue-500 text-white px-4 py-2 rounded">Edit</button>
+                <button @click="showDeleteModal(product.id)" class="bg-red-500 text-white px-4 py-2 rounded">Delete</button>
+                <button @click="pushProduct(product.id)" class="bg-green-500 text-white px-4 py-2 rounded">Push</button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
     <!-- Edit Product Modal -->
@@ -45,8 +63,10 @@
                 <label class="block text-gray-700">Description:</label>
                 <textarea v-model="editingProduct.pro_description" class="w-full border rounded px-3 py-2"></textarea>
               </div>
-              <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Update</button>
-              <button @click="cancelEdit" class="bg-gray-500 text-white px-4 py-2 rounded ml-2">Cancel</button>
+              <div class="flex justify-end space-x-2">
+                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Update</button>
+                <button @click="cancelEdit" class="bg-gray-500 text-white px-4 py-2 rounded">Cancel</button>
+              </div>
             </form>
           </div>
         </transition>
@@ -59,8 +79,8 @@
         <div class="bg-white p-8 rounded-lg shadow-lg w-1/3">
           <h3 class="text-xl font-bold mb-4">Confirm Deletion</h3>
           <p class="mb-4">Are you sure you want to delete this product?</p>
-          <div class="flex justify-end">
-            <button @click="confirmDelete" class="bg-red-500 text-white px-4 py-2 rounded mr-2">Delete</button>
+          <div class="flex justify-end space-x-2">
+            <button @click="confirmDelete" class="bg-red-500 text-white px-4 py-2 rounded">Delete</button>
             <button @click="cancelDelete" class="bg-gray-500 text-white px-4 py-2 rounded">Cancel</button>
           </div>
         </div>
@@ -139,6 +159,10 @@ export default {
     },
     cancelEdit() {
       this.editingProduct = null;
+    },
+    pushProduct(productId) {
+      // Implement the push functionality here
+      console.log('Pushing product with ID:', productId);
     }
   }
 };
