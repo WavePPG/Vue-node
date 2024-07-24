@@ -9,6 +9,8 @@ import UserLayout from '../layouts/UserLayout.vue';
 import AdminLayout from '../layouts/AdminLayout.vue';
 import UploadProduct from '../components/admin/UploadProduct.vue';
 import UserProfile from '../components/UserProfile.vue'; // Import UserProfile component
+import UserProductDetail from '../components/product/UserProductDetail.vue';
+import ProductHome from '@/components/product/ProductHome.vue';
 
 const routes = [
   {
@@ -39,6 +41,17 @@ const routes = [
         path: 'product',
         name: 'UserProduct',
         component: UserProduct,
+      },
+      {
+        path: 'product/:id', // Add route for product details
+        name: 'UserProductDetail',
+        component: UserProductDetail,
+        props: true, // Allow route params to be passed as props
+      },
+      {
+        path: 'home', // Add route for product details
+        name: 'ProductHome',
+        component: ProductHome,
       },
       {
         path: 'profile',

@@ -74,6 +74,24 @@ app.get('/products', (req, res) => {
   });
 });
 
+// New route to get a single product by ID
+app.get('/products/:id', (req, res) => {
+  const { id } = req.params;
+  const query = `
+    SELECT p.*, t.type_name AS typename 
+    FROM product p 
+    JOIN type t ON p.type_id = t.type_id 
+    WHERE p.id = ?
+  `;
+  db.query(query, [id], (err, results) => {
+    if (err) throw err;
+    if (results.length === 0) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+    res.json(results[0]);
+  });
+});
+
 // New route to update product
 app.put('/products/:id', (req, res) => {
   const { id } = req.params;
