@@ -8,6 +8,7 @@
         <p class="text-gray-800 font-bold text-lg mb-2">Price: {{ product.price }}</p>
         <p class="text-gray-600 mb-2">Amount: {{ product.amount }}</p>
         <p class="text-gray-700 mt-4">{{ product.pro_description }}</p>
+        <button @click="addToCart" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Add to Cart</button>
       </div>
     </div>
     <div v-else class="text-center text-gray-700">
@@ -21,18 +22,20 @@
 export default {
   props: {
     id: {
-      type: String,  // Ensure this is a string
+      type: String,
       required: true,
     },
   },
   data() {
     return {
       product: null,
-      loading: true,  // Add a loading state
+      loading: true,
+      user: null,
     };
   },
   created() {
     this.fetchProduct();
+    this.fetchUser();
   },
   methods: {
     async fetchProduct() {
@@ -42,12 +45,61 @@ export default {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        console.log('Product data:', data); // Debug log to check data
+        console.log('Product data:', data);
         this.product = data;
       } catch (error) {
         console.error('Error fetching product:', error);
       } finally {
-        this.loading = false;  // Ensure loading state is updated
+        this.loading = false;
+      }
+    },
+    async fetchUser() {
+      try {
+        const response = await fetch(`http://localhost:3001/auth/user`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const userData = await response.json();
+        console.log('User data:', userData);
+        this.user = userData;
+      } catch (error) {
+        console.error('Error fetching user:', error);
+      }
+    },
+    async addToCart() {
+      if (!this.user) {
+        alert('Please log in to add items to your cart.');
+        return;
+      }
+
+      try {
+        const response = await fetch(`http://localhost:3003/cart`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          },
+          body: JSON.stringify({
+            productId: this.product.id,
+            quantity: 1,
+            product: this.product,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const cartData = await response.json();
+        console.log('Cart data:', cartData);
+        alert('Product added to cart successfully.');
+      } catch (error) {
+        console.error('Error adding product to cart:', error);
+        alert('Failed to add product to cart.');
       }
     },
   },

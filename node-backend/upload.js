@@ -41,6 +41,23 @@ app.use(cors());
 app.use(express.json());
 app.use(`/${uploadDir}`, express.static(uploadDir));
 
+// Middleware to authenticate user (mock implementation)
+const authenticate = (req, res, next) => {
+  const token = req.headers['authorization'];
+  if (token) {
+    // Decode token and validate user (mock implementation)
+    req.user = { id: 1, name: 'John Doe' }; // Mock user
+    next();
+  } else {
+    res.status(401).send('Unauthorized');
+  }
+};
+
+// Route to get user information
+app.get('/auth/user', authenticate, (req, res) => {
+  res.json(req.user);
+});
+
 // Route to get product types
 app.get('/types', (req, res) => {
   db.query('SELECT type_id AS id, type_name AS name FROM type', (err, results) => {
@@ -61,7 +78,7 @@ app.post('/upload', upload.single('image'), (req, res) => {
   });
 });
 
-// New route to get all products with type name
+// Route to get all products with type name
 app.get('/products', (req, res) => {
   const query = `
     SELECT p.*, t.type_name AS typename 
@@ -74,7 +91,7 @@ app.get('/products', (req, res) => {
   });
 });
 
-// New route to get a single product by ID
+// Route to get a single product by ID
 app.get('/products/:id', (req, res) => {
   const { id } = req.params;
   const query = `
@@ -92,7 +109,7 @@ app.get('/products/:id', (req, res) => {
   });
 });
 
-// New route to update product
+// Route to update product
 app.put('/products/:id', (req, res) => {
   const { id } = req.params;
   const { pro_name, type_id, price, amount, pro_description } = req.body;
@@ -104,7 +121,7 @@ app.put('/products/:id', (req, res) => {
   });
 });
 
-// New route to delete product
+// Route to delete product
 app.delete('/products/:id', (req, res) => {
   const { id } = req.params;
 

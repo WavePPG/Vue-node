@@ -15,6 +15,10 @@
             <i class="fas fa-upload text-gray-600"></i>
             <span v-if="isOpen" class="ml-4 text-gray-700">Upload Product</span>
           </router-link>
+          <router-link to="/admin/orders" class="flex items-center w-full px-4 py-2 hover:bg-gray-100">
+            <i class="fas fa-list text-gray-600"></i>
+            <span v-if="isOpen" class="ml-4 text-gray-700">Orders</span>
+          </router-link>
         </div>
       </div>
       <div @click="logout" class="flex items-center w-full px-4 py-2 mb-6 cursor-pointer hover:bg-gray-100">

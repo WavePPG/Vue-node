@@ -8,9 +8,13 @@ import AdminLogin from '../components/admin/AdminLogin.vue';
 import UserLayout from '../layouts/UserLayout.vue';
 import AdminLayout from '../layouts/AdminLayout.vue';
 import UploadProduct from '../components/admin/UploadProduct.vue';
-import UserProfile from '../components/UserProfile.vue'; // Import UserProfile component
+import UserProfile from '../components/UserProfile.vue';
 import UserProductDetail from '../components/product/UserProductDetail.vue';
 import ProductHome from '@/components/product/ProductHome.vue';
+import UserCart from '../components/UserCart.vue'; // Import UserCart component
+import CheckOut from '../components/CheckOut.vue'; // Import CheckOut component
+import HistoryUser from '../components/HistoryUser.vue'; // Import History component
+import AdminOrders from '../components/admin/AdminOrders.vue'; // Import AdminOrders component
 
 const routes = [
   {
@@ -43,21 +47,39 @@ const routes = [
         component: UserProduct,
       },
       {
-        path: 'product/:id', // Add route for product details
+        path: 'product/:id',
         name: 'UserProductDetail',
         component: UserProductDetail,
-        props: true, // Allow route params to be passed as props
+        props: true,
       },
       {
-        path: 'home', // Add route for product details
+        path: 'home',
         name: 'ProductHome',
         component: ProductHome,
       },
       {
         path: 'profile',
         name: 'UserProfile',
-        component: UserProfile, // Add UserProfile route
-        meta: { requiresAuth: true }, // Add requiresAuth meta field
+        component: UserProfile,
+        meta: { requiresAuth: true },
+      },
+      {
+        path: 'cart',
+        name: 'UserCart',
+        component: UserCart,
+        meta: { requiresAuth: true },
+      },
+      {
+        path: 'checkout',
+        name: 'CheckOut',
+        component: CheckOut,
+        meta: { requiresAuth: true },
+      },
+      {
+        path: 'history',
+        name: 'HistoryUser',
+        component: HistoryUser,
+        meta: { requiresAuth: true },
       },
     ],
   },
@@ -69,24 +91,30 @@ const routes = [
         path: 'login',
         name: 'AdminLogin',
         component: AdminLogin,
-        meta: { hideSidebar: true }, // Meta field to conditionally hide sidebar
+        meta: { hideSidebar: true },
       },
       {
         path: 'dashboard',
         name: 'AdminDashboard',
         component: AdminDashboard,
-        meta: { requiresAuth: true }, // Meta field for authentication guard
+        meta: { requiresAuth: true },
       },
       {
         path: 'upload-product',
         name: 'UploadProduct',
         component: UploadProduct,
-        meta: { requiresAuth: true }, // Meta field for authentication guard
+        meta: { requiresAuth: true },
+      },
+      {
+        path: 'orders',
+        name: 'AdminOrders',
+        component: AdminOrders,
+        meta: { requiresAuth: true },
       },
     ],
   },
   {
-    path: '/:pathMatch(.*)*', // Handle unmatched routes
+    path: '/:pathMatch(.*)*',
     redirect: '/',
   },
 ];
@@ -96,11 +124,10 @@ const router = createRouter({
   routes,
 });
 
-// Navigation guard to prevent access to admin pages without logging in
 router.beforeEach((to, from, next) => {
   const loggedIn = localStorage.getItem('token');
   if (to.matched.some(record => record.meta.requiresAuth) && !loggedIn) {
-    next({ name: 'AdminLogin' });
+    next({ name: 'UserLogin' });
   } else {
     next();
   }
