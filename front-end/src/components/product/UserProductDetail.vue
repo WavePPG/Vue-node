@@ -1,105 +1,78 @@
 <template>
-  <div class="container mx-auto p-4">
-    <div v-if="product" class="flex flex-col md:flex-row md:space-x-6">
-      <img :src="`http://localhost:3001/uploads/${product.image}`" alt="Product Image" class="w-full md:w-1/2 h-64 object-cover mb-4 rounded-lg shadow-md">
-      <div class="flex-1">
-        <h1 class="text-3xl font-bold mb-6">{{ product.pro_name }}</h1>
-        <p class="text-gray-600 mb-2">Type: {{ product.typename }}</p>
-        <p class="text-gray-800 font-bold text-lg mb-2">Price: {{ product.price }}</p>
-        <p class="text-gray-600 mb-2">Amount: {{ product.amount }}</p>
-        <p class="text-gray-700 mt-4">{{ product.pro_description }}</p>
-        <button @click="addToCart" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Add to Cart</button>
+  <div class="max-w-4xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
+    <div v-if="product" class="flex flex-col md:flex-row items-center">
+      <img :src="`http://localhost:3001/uploads/${product.image}`" alt="product image" class="w-full md:w-1/2 rounded-lg shadow-md"/>
+      <div class="mt-6 md:mt-0 md:ml-6">
+        <h1 class="text-2xl font-bold text-gray-800">{{ product.pro_name }}</h1>
+        <p class="text-gray-600 mt-2">Type: {{ product.typename }}</p>
+        <p class="text-gray-600 mt-2">Price: ${{ product.price }}</p>
+        <p class="text-gray-600 mt-2">Amount: {{ product.amount }}</p>
+        <p class="text-gray-600 mt-4">{{ product.pro_description }}</p>
+        <button @click="addToCart" class="mt-6 px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-opacity-50">
+          Add to Cart
+        </button>
       </div>
     </div>
-    <div v-else class="text-center text-gray-700">
-      <p v-if="loading">Loading...</p>
-      <p v-else>Failed to load product details.</p>
+    <div v-else>
+      <p class="text-gray-600">Loading product...</p>
     </div>
   </div>
 </template>
 
 <script>
+import axios from '@/services/axiosInstance';
+
 export default {
-  props: {
-    id: {
-      type: String,
-      required: true,
-    },
-  },
+  name: 'UserProductDetail',
   data() {
     return {
       product: null,
-      loading: true,
-      user: null,
+      userId: null
     };
   },
-  created() {
-    this.fetchProduct();
-    this.fetchUser();
+  props: {
+    id: {
+      type: String,
+      required: true
+    }
+  },
+  async created() {
+    const productId = this.id;
+    await this.fetchProduct(productId);
+    const storedUserId = localStorage.getItem('user_id'); // ใช้ 'user_id' ให้ตรงกับตอนเก็บ
+    if (storedUserId) {
+      this.userId = parseInt(storedUserId, 10);
+      if (isNaN(this.userId)) {
+        console.error('Failed to parse userId from localStorage');
+      } else {
+        console.log('User ID:', this.userId); // log userId
+      }
+    } else {
+      console.error('No userId found in localStorage');
+    }
   },
   methods: {
-    async fetchProduct() {
+    async fetchProduct(productId) {
       try {
-        const response = await fetch(`http://localhost:3001/products/${this.id}`);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        console.log('Product data:', data);
-        this.product = data;
+        const response = await axios.get(`http://localhost:3001/products/${productId}`);
+        this.product = response.data;
       } catch (error) {
         console.error('Error fetching product:', error);
-      } finally {
-        this.loading = false;
-      }
-    },
-    async fetchUser() {
-      try {
-        const response = await fetch(`http://localhost:3001/auth/user`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          },
-        });
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const userData = await response.json();
-        console.log('User data:', userData);
-        this.user = userData;
-      } catch (error) {
-        console.error('Error fetching user:', error);
       }
     },
     async addToCart() {
-      if (!this.user) {
-        alert('Please log in to add items to your cart.');
+      if (!this.userId) {
+        console.error('User ID is not defined');
         return;
       }
-
       try {
-        const response = await fetch(`http://localhost:3003/cart`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          },
-          body: JSON.stringify({
-            productId: this.product.id,
-            quantity: 1,
-            product: this.product,
-          }),
+        const response = await axios.post(`http://localhost:3003/cart/${this.userId}/add`, {
+          productId: this.product.id,
+          quantity: 1,
         });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const cartData = await response.json();
-        console.log('Cart data:', cartData);
-        alert('Product added to cart successfully.');
+        console.log('Added to cart:', response.data);
       } catch (error) {
-        console.error('Error adding product to cart:', error);
-        alert('Failed to add product to cart.');
+        console.error('Error adding to cart:', error);
       }
     },
   },
@@ -107,4 +80,8 @@ export default {
 </script>
 
 <style scoped>
+.product-image {
+  max-height: 400px;
+  object-fit: cover;
+}
 </style>

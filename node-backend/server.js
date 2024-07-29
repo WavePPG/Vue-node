@@ -85,7 +85,6 @@ app.post('/admin/login', (req, res) => {
     });
   });
 });
-
 // Login endpoint
 app.post('/login', (req, res) => {
   const { email, password } = req.body;
@@ -113,9 +112,15 @@ app.post('/login', (req, res) => {
     }
 
     const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, secretKey, { expiresIn: '1h' });
-    res.status(200).json({ message: 'Login successful', token, username: user.username });
+    res.status(200).json({ 
+      message: 'Login successful', 
+      token, 
+      username: user.username,
+      user_id: user.id // เพิ่ม user_id ใน response
+    });
   });
 });
+
 
 
 // Protected route example

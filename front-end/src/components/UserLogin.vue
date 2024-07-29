@@ -38,8 +38,14 @@ export default {
           password: this.password,
         });
 
+        if (response.data.user_id) {
+          localStorage.setItem('user_id', response.data.user_id); // เก็บ user_id ใน localStorage
+          console.log('User ID:', response.data.user_id); // แสดง user_id ในคอนโซล
+        }
+
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('username', response.data.username);
+        console.log('Username:', response.data.username); // แสดงชื่อผู้ใช้ในคอนโซล
         this.$router.push({ name: 'UserProfile' });
       } catch (error) {
         console.error('Login failed', error);

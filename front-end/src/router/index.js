@@ -50,8 +50,8 @@ const routes = [
         path: 'product/:id',
         name: 'UserProductDetail',
         component: UserProductDetail,
-        props: true,
-      },
+        props: true, // ให้ส่งเฉพาะ id เป็น props
+      },      
       {
         path: 'home',
         name: 'ProductHome',
