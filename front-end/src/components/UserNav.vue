@@ -3,8 +3,8 @@
     <div class="flex items-center justify-between w-full max-w-screen-xl mx-auto">
       <div class="text-2xl font-bold font-serif mr-10">Furniro</div>
       <div class="hidden md:flex space-x-5">
-        <router-link to="/home" class="text-lg font-bold font-serif text-gray-800 hover:text-blue-500 hover:underline">Home</router-link>
-        <router-link to="/shop" class="text-lg font-bold font-serif text-gray-800 hover:text-blue-500 hover:underline">Shop</router-link>
+        <router-link to="/shop" class="text-lg font-bold font-serif text-gray-800 hover:text-blue-500 hover:underline">Home</router-link>
+        <router-link to="/home" class="text-lg font-bold font-serif text-gray-800 hover:text-blue-500 hover:underline">Shop</router-link>
         <router-link to="/about" class="text-lg font-bold font-serif text-gray-800 hover:text-blue-500 hover:underline">About</router-link>
         <router-link to="/contact" class="text-lg font-bold font-serif text-gray-800 hover:text-blue-500 hover:underline">Contact</router-link>
       </div>
@@ -34,8 +34,8 @@
     </div>
   </nav>
   <div :class="isOpen ? 'block' : 'hidden'" class="md:hidden mobile-menu">
-    <router-link @click="toggleMenu" to="/home" class="block text-lg font-bold font-serif text-gray-800 hover:text-blue-500 hover:underline py-2">Home</router-link>
-    <router-link @click="toggleMenu" to="/shop" class="block text-lg font-bold font-serif text-gray-800 hover:text-blue-500 hover:underline py-2">Shop</router-link>
+    <router-link @click="toggleMenu" to="/shop" class="block text-lg font-bold font-serif text-gray-800 hover:text-blue-500 hover:underline py-2">Home</router-link>
+    <router-link @click="toggleMenu" to="/home" class="block text-lg font-bold font-serif text-gray-800 hover:text-blue-500 hover:underline py-2">shop</router-link>
     <router-link @click="toggleMenu" to="/about" class="block text-lg font-bold font-serif text-gray-800 hover:text-blue-500 hover:underline py-2">About</router-link>
     <router-link @click="toggleMenu" to="/contact" class="block text-lg font-bold font-serif text-gray-800 hover:text-blue-500 hover:underline py-2">Contact</router-link>
   </div>

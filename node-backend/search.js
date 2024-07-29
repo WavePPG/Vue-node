@@ -6,14 +6,14 @@ const path = require('path');
 const app = express();
 const port = 3005;
 
-app.use(cors()); // เพื่อให้สามารถเชื่อมต่อกับ front-end
-app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // เส้นทางสำหรับไฟล์ภาพ
+app.use(cors()); // Enable CORS
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // Static path for image files
 
-// สร้างการเชื่อมต่อกับฐานข้อมูล
+// Create a connection to the database
 const db = mysql2.createConnection({
   host: 'localhost',
   user: 'root',
-  password: '', // แทนที่ด้วยรหัสผ่านของคุณ
+  password: '', // Replace with your password
   database: 'restapi',
 });
 
@@ -25,7 +25,7 @@ db.connect(err => {
   console.log('Connected to the database.');
 });
 
-// สร้าง API สำหรับดึงข้อมูลสินค้า
+// API to fetch product data
 app.get('/api/products', (req, res) => {
   const query = 'SELECT * FROM product';
   db.query(query, (err, results) => {
@@ -37,6 +37,40 @@ app.get('/api/products', (req, res) => {
     res.json(results);
   });
 });
+
+// API to fetch category data with icons
+app.get('/api/categories', (req, res) => {
+  const query = 'SELECT * FROM type';
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error('Error fetching data:', err);
+      res.status(500).send('Error fetching data');
+      return;
+    }
+    const categories = results.map(category => {
+      return {
+        ...category,
+        icon: getCategoryIcon(category.type_name) // Add icon based on type_name
+      };
+    });
+    res.json(categories);
+  });
+});
+
+function getCategoryIcon(typeName) {
+  switch (typeName) {
+    case 'สินค้าทั่วไป':
+      return 'https://example.com/icons/general.png';
+    case 'Electronic':
+      return 'https://example.com/icons/electronic.png';
+    case 'ตกแต่งห้อง':
+      return 'https://example.com/icons/decoration.png';
+    case 'สวนสวย':
+      return 'https://example.com/icons/garden.png';
+    default:
+      return 'https://example.com/icons/default.png';
+  }
+}
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
