@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "concurrently \"nodemon server.js\" \"nodemon upload.js\" \"nodemon admin.js\" \"nodemon Cart.js\" \"nodemon checkout.js\""
+    "dev": "concurrently \"nodemon server.js\" \"nodemon upload.js\" \"nodemon admin.js\" \"nodemon Cart.js\" \"nodemon checkout.js\" \"nodemon search.js\""
   },
   "keywords": [],
   "author": "",

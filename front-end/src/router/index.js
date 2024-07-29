@@ -11,10 +11,12 @@ import UploadProduct from '../components/admin/UploadProduct.vue';
 import UserProfile from '../components/UserProfile.vue';
 import UserProductDetail from '../components/product/UserProductDetail.vue';
 import ProductHome from '@/components/product/ProductHome.vue';
-import UserCart from '../components/UserCart.vue'; // Import UserCart component
-import CheckOut from '../components/CheckOut.vue'; // Import CheckOut component
-import HistoryUser from '../components/HistoryUser.vue'; // Import History component
-import AdminOrders from '../components/admin/AdminOrders.vue'; // Import AdminOrders component
+import UserCart from '../components/UserCart.vue';
+import CheckOut from '../components/CheckOut.vue';
+import HistoryUser from '../components/HistoryUser.vue';
+import AdminOrders from '../components/admin/AdminOrders.vue';
+// ตรวจสอบเส้นทางที่ถูกต้องสำหรับ SearchResults.vue
+import SearchResults from '../components/SearchResults.vue'; // แก้ไขเส้นทางให้ถูกต้อง
 
 const routes = [
   {
@@ -50,7 +52,7 @@ const routes = [
         path: 'product/:id',
         name: 'UserProductDetail',
         component: UserProductDetail,
-        props: true, // ให้ส่งเฉพาะ id เป็น props
+        props: true,
       },      
       {
         path: 'home',
@@ -60,26 +62,32 @@ const routes = [
       {
         path: 'profile',
         name: 'UserProfile',
-        component: UserProfile,
         meta: { requiresAuth: true },
+        component: UserProfile,
       },
       {
         path: 'cart',
         name: 'UserCart',
-        component: UserCart,
         meta: { requiresAuth: true },
+        component: UserCart,
       },
       {
         path: 'checkout',
         name: 'CheckOut',
-        component: CheckOut,
         meta: { requiresAuth: true },
+        component: CheckOut,
       },
       {
         path: 'history',
         name: 'HistoryUser',
-        component: HistoryUser,
         meta: { requiresAuth: true },
+        component: HistoryUser,
+      },
+      {
+        path: 'searchresults',
+        name: 'SearchResults',
+        meta: { requiresAuth: true },
+        component: SearchResults,
       },
     ],
   },

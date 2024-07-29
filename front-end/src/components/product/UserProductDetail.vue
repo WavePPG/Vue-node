@@ -16,6 +16,14 @@
     <div v-else>
       <p class="text-gray-600">Loading product...</p>
     </div>
+    <div v-if="showCartNotification" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+      <div class="bg-white p-12 rounded-lg shadow-lg flex flex-col items-center text-center w-1/2 max-w-lg mx-auto">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-green-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l1.38-5H6.6m-3.22-6H21M7 13l1.68 7M7 13h10m0 0l1.66 7M7 13l-.4-2M17 13l.4-2m0 0l1.38-5M7 13L5.4 6m15.2 0H5.4m15.2 0l-.4 2M7 13H5.4m0 0L3 3" />
+        </svg>
+        <span class="text-2xl font-bold">Item added to cart!</span>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -27,7 +35,8 @@ export default {
   data() {
     return {
       product: null,
-      userId: null
+      userId: null,
+      showCartNotification: false, // สถานะแจ้งเตือน
     };
   },
   props: {
@@ -71,6 +80,10 @@ export default {
           quantity: 1,
         });
         console.log('Added to cart:', response.data);
+        this.showCartNotification = true; // แสดงแจ้งเตือน
+        setTimeout(() => {
+          this.showCartNotification = false; // ซ่อนแจ้งเตือนหลังจาก 3 วินาที
+        }, 3000);
       } catch (error) {
         console.error('Error adding to cart:', error);
       }
