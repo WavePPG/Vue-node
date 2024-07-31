@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const _ = require('lodash');
 const cors = require('cors');
 const mysql2 = require('mysql2');
+const path = require('path');
 
 const app = express();
 const port = 3004;
@@ -16,30 +17,30 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// In-memory store for transactions
-const transactions = {};
+// Serve static files from the "uploads" directory
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// สร้างการเชื่อมต่อกับฐานข้อมูล
+// Create a connection to the database
 const db = mysql2.createConnection({
   host: 'localhost',
   user: 'root',
-  password: '', // แทนที่ด้วยรหัสผ่านของคุณ
+  password: '', // Replace with your database password
   database: 'restapi',
 });
 
 db.connect((err) => {
-    if (err) {
-        console.error('Error connecting to the database:', err);
-        return;
-    }
-    console.log('Connected to the MySQL database.');
+  if (err) {
+    console.error('Error connecting to the database:', err);
+    return;
+  }
+  console.log('Connected to the MySQL database.');
 });
 
 // Generate QR Code endpoint
 app.post('/generateQR', (req, res) => {
     const amount = parseFloat(_.get(req, ["body", "amount"]));
     const cartItems = _.get(req, ["body", "cartItems"], []);
-    const userId = _.get(req, ["body", "userId"]); // ดึง userId จากคำขอ
+    const userId = _.get(req, ["body", "userId"]); // Get userId from the request
     const mobileNumber = '0623607693'; // Replace with your actual mobile number
     const payload = generatePayload(mobileNumber, { amount });
     const options = {
@@ -78,12 +79,12 @@ app.post('/generateQR', (req, res) => {
 
         // Store each cart item in transaction_items
         const insertItemQuery = `
-            INSERT INTO transaction_items (transaction_id, product_id, pro_name, quantity, price)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO transaction_items (transaction_id, product_id, pro_name, quantity, price, image)
+            VALUES (?, ?, ?, ?, ?, ?)
         `;
 
         cartItems.forEach(item => {
-            db.query(insertItemQuery, [transactionId, item.productId, item.pro_name, item.quantity, item.price], (error) => {
+            db.query(insertItemQuery, [transactionId, item.productId, item.pro_name, item.quantity, item.price, item.image], (error) => {
                 if (error) {
                     console.error('Error saving transaction item:', error);
                 }
@@ -108,7 +109,6 @@ app.post('/generateQR', (req, res) => {
         });
     });
 });
-
 
 // Check Payment Status endpoint
 app.post('/checkPaymentStatus', (req, res) => {
@@ -160,40 +160,40 @@ app.post('/updateTransactionStatus', (req, res) => {
 // Endpoint to retrieve order details
 app.get('/orderDetails/:transactionId?', (req, res) => {
     const transactionId = req.params.transactionId;
-  
+
     if (transactionId) {
         const transaction = transactions[transactionId];
-      
+
         if (!transaction) {
-          return res.status(400).json({
-            RespCode: 400,
-            RespMessage: 'Transaction not found',
-          });
+            return res.status(400).json({
+                RespCode: 400,
+                RespMessage: 'Transaction not found',
+            });
         }
-      
+
         return res.status(200).json({
-          RespCode: 200,
-          RespMessage: 'Order details retrieved successfully',
-          Result: {
-            cartItems: transaction.cartItems,
-            amount: transaction.amount,
-          },
+            RespCode: 200,
+            RespMessage: 'Order details retrieved successfully',
+            Result: {
+                cartItems: transaction.cartItems,
+                amount: transaction.amount,
+            },
         });
     } else {
         const allTransactions = Object.keys(transactions).map(id => ({
             transactionId: id,
             ...transactions[id]
         }));
-      
+
         return res.status(200).json({
-          RespCode: 200,
-          RespMessage: 'All transactions retrieved successfully',
-          Result: allTransactions,
+            RespCode: 200,
+            RespMessage: 'All transactions retrieved successfully',
+            Result: allTransactions,
         });
     }
 });
 
-// เพิ่ม endpoint สำหรับบันทึกที่อยู่พร้อมเบอร์โทรศัพท์
+// Endpoint to save address with phone number
 app.post('/saveAddress', (req, res) => {
     const { user_id, address_line1, address_line2, city, state, postal_code, country, phone_number } = req.body;
 
@@ -225,7 +225,7 @@ app.post('/saveAddress', (req, res) => {
     });
 });
 
-// Endpoint สำหรับลบที่อยู่
+// Endpoint to delete an address
 app.post('/deleteAddress', (req, res) => {
     const { id } = req.body;
 
@@ -254,7 +254,7 @@ app.post('/deleteAddress', (req, res) => {
     });
 });
 
-// Endpoint สำหรับแก้ไขที่อยู่พร้อมเบอร์โทรศัพท์
+// Endpoint to update an address with phone number
 app.post('/updateAddress', (req, res) => {
     const { id, address_line1, address_line2, city, state, postal_code, country, phone_number } = req.body;
 
@@ -287,7 +287,7 @@ app.post('/updateAddress', (req, res) => {
     });
 });
 
-// Endpoint สำหรับดึงที่อยู่ที่มีอยู่ของผู้ใช้
+// Endpoint to retrieve user addresses
 app.get('/addresses/:userId', (req, res) => {
     const userId = req.params.userId;
 
@@ -312,13 +312,13 @@ app.get('/addresses/:userId', (req, res) => {
     });
 });
 
-// เพิ่ม endpoint สำหรับดึงข้อมูลธุรกรรมของผู้ใช้
+// Endpoint to retrieve user transactions
 app.get('/transactions/:userId', (req, res) => {
     const { userId } = req.params;
-  
+
     const query = `
-      SELECT t.id AS transaction_id, t.amount, t.date, t.status, 
-             ti.product_id, ti.pro_name, ti.quantity, ti.price, 
+      SELECT t.id AS transaction_id, t.amount, t.date, t.status,
+             ti.product_id, ti.pro_name, ti.quantity, ti.price, ti.image,
              a.address_line1, a.address_line2, a.city, a.state, a.postal_code, a.country, a.phone_number
       FROM transactions t
       JOIN transaction_items ti ON t.id = ti.transaction_id
@@ -326,7 +326,7 @@ app.get('/transactions/:userId', (req, res) => {
       WHERE t.user_id = ?
       ORDER BY t.date DESC
     `;
-  
+
     db.query(query, [userId], (error, results) => {
       if (error) {
         console.error('Error fetching transactions:', error);
@@ -335,13 +335,13 @@ app.get('/transactions/:userId', (req, res) => {
           RespMessage: 'Failed to fetch transactions',
         });
       }
-  
+
       const transactions = results.reduce((acc, row) => {
-        const { transaction_id, amount, date, status, product_id, pro_name, quantity, price, address_line1, address_line2, city, state, postal_code, country, phone_number } = row;
+        const { transaction_id, amount, date, status, product_id, pro_name, quantity, price, image, address_line1, address_line2, city, state, postal_code, country, phone_number } = row;
         const existingTransaction = acc.find(t => t.id === transaction_id);
-  
-        const item = { id: product_id, pro_name, quantity, price };
-  
+
+        const item = { id: product_id, pro_name, quantity, price, image };
+
         if (existingTransaction) {
           existingTransaction.items.push(item);
         } else {
@@ -354,22 +354,23 @@ app.get('/transactions/:userId', (req, res) => {
             items: [item]
           });
         }
-  
+
         return acc;
       }, []);
-  
+
       return res.status(200).json({
         RespCode: 200,
         RespMessage: 'Transactions retrieved successfully',
         Result: transactions,
       });
     });
-  });
-  app.get('/admin/orders', (req, res) => {
+});
+
+app.get('/admin/orders', (req, res) => {
     const query = `
-        SELECT t.id AS transaction_id, t.user_id, t.amount, t.date, t.status, 
-               ti.product_id, ti.pro_name, ti.quantity, ti.price, 
-               u.username, u.email, 
+        SELECT t.id AS transaction_id, t.user_id, t.amount, t.date, t.status,
+               ti.product_id, ti.pro_name, ti.quantity, ti.price, ti.image,
+               u.username, u.email,
                a.address_line1, a.address_line2, a.city, a.state, a.postal_code, a.country, a.phone_number
         FROM transactions t
         JOIN transaction_items ti ON t.id = ti.transaction_id
@@ -388,10 +389,10 @@ app.get('/transactions/:userId', (req, res) => {
         }
 
         const orders = results.reduce((acc, row) => {
-            const { transaction_id, user_id, amount, date, status, product_id, pro_name, quantity, price, username, email, address_line1, address_line2, city, state, postal_code, country, phone_number } = row;
+            const { transaction_id, user_id, amount, date, status, product_id, pro_name, quantity, price, image, username, email, address_line1, address_line2, city, state, postal_code, country, phone_number } = row;
             const existingTransaction = acc.find(order => order.id === transaction_id);
 
-            const item = { product_id, pro_name, quantity, price };
+            const item = { product_id, pro_name, quantity, price, image };
 
             if (existingTransaction) {
                 existingTransaction.items.push(item);
@@ -420,37 +421,36 @@ app.get('/transactions/:userId', (req, res) => {
     });
 });
 
+
 app.post('/admin/orders/updateStatus', (req, res) => {
-    const { orderId, status } = req.body;
+  const { orderId, status } = req.body;
 
-    if (!orderId || !status) {
-        return res.status(400).json({
-            RespCode: 400,
-            RespMessage: 'Order ID and status are required',
-        });
-    }
+  if (!orderId || !status) {
+      return res.status(400).json({
+          RespCode: 400,
+          RespMessage: 'Order ID and status are required',
+      });
+  }
 
-    const query = `UPDATE transactions SET status = ? WHERE id = ?`;
+  const query = `UPDATE transactions SET status = ? WHERE id = ?`;
 
-    db.query(query, [status, orderId], (error, results) => {
-        if (error) {
-            console.error('Error updating order status:', error);
-            return res.status(500).json({
-                RespCode: 500,
-                RespMessage: 'Failed to update order status',
-            });
-        }
+  db.query(query, [status, orderId], (error, results) => {
+      if (error) {
+          console.error('Error updating order status:', error);
+          return res.status(500).json({
+              RespCode: 500,
+              RespMessage: 'Failed to update order status',
+          });
+      }
 
-        return res.status(200).json({
-            RespCode: 200,
-            RespMessage: 'Order status updated successfully',
-        });
-    });
+      return res.status(200).json({
+          RespCode: 200,
+          RespMessage: 'Order status updated successfully',
+      });
+  });
 });
-
-  
 
 // Start the server
 app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
+  console.log(`Server is running on port ${port}`);
 });

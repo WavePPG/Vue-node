@@ -15,7 +15,6 @@ import UserCart from '../components/UserCart.vue';
 import CheckOut from '../components/CheckOut.vue';
 import HistoryUser from '../components/HistoryUser.vue';
 import AdminOrders from '../components/admin/AdminOrders.vue';
-// ตรวจสอบเส้นทางที่ถูกต้องสำหรับ SearchResults.vue
 import SearchResults from '../components/SearchResults.vue'; // แก้ไขเส้นทางให้ถูกต้อง
 
 const routes = [
@@ -53,6 +52,7 @@ const routes = [
         name: 'UserProductDetail',
         component: UserProductDetail,
         props: true,
+        meta: { requiresAuth: true },
       },      
       {
         path: 'home',
