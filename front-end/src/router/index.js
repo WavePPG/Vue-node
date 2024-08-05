@@ -15,7 +15,9 @@ import UserCart from '../components/UserCart.vue';
 import CheckOut from '../components/CheckOut.vue';
 import HistoryUser from '../components/HistoryUser.vue';
 import AdminOrders from '../components/admin/AdminOrders.vue';
-import SearchResults from '../components/SearchResults.vue'; // แก้ไขเส้นทางให้ถูกต้อง
+import SearchResults from '../components/SearchResults.vue';
+import UserContact from '../components/UserContact.vue';
+import AboutUser from '../components/AboutUser.vue'; // Import AboutUser
 
 const routes = [
   {
@@ -53,7 +55,7 @@ const routes = [
         component: UserProductDetail,
         props: true,
         meta: { requiresAuth: true },
-      },      
+      },
       {
         path: 'home',
         name: 'ProductHome',
@@ -88,6 +90,16 @@ const routes = [
         name: 'SearchResults',
         meta: { requiresAuth: true },
         component: SearchResults,
+      },
+      {
+        path: 'contact',
+        name: 'UserContact',
+        component: UserContact,
+      },
+      {
+        path: 'about',
+        name: 'AboutUser',
+        component: AboutUser,
       },
     ],
   },
